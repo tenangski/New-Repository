@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🐱💃 Disco Cat Animation</title>
+
+<style>
+  :root {
+    --cat-color: #333;
+    --accent: #ff4b2b;
+  }
+
+  body {
+    background: radial-gradient(circle at center, #1a1a1a, #000);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: white;
+    font-family: "Poppins", sans-serif;
+  }
+
+  canvas#lights {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+    animation: bounce 1s infinite ease-in-out;
+  }
+
+  .cat {
+    position: relative;
+    width: 120px;
+    height: 100px;
+    background: var(--cat-color);
+    border-radius: 60px 60px 40px 40px;
+    animation: wiggle 0.6s infinite alternate;
+  }
+
+  .ear {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: var(--cat-color);
+    top: -25px;
+    border-radius: 10px;
+  }
+  .ear.left { left: 10px; transform: rotate(-20deg); }
+  .ear.right { right: 10px; transform: rotate(20deg); }
+
+  .eye {
+    position: absolute;
+    top: 30px;
+    width: 15px;
+    height: 15px;
+    background: white;
+    border-radius: 50%;
+  }
+  .eye.left { left: 30px; }
+  .eye.right { right: 30px; }
+  .eye::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 7px;
+    height: 7px;
+    background: black;
+    border-radius: 50%;
+    animation: blink 3s infinite;
+  }
+
+  .mouth {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    border-bottom: 3px solid #fff;
+    border-radius: 0 0 10px 10px;
+    left: 50%;
+    top: 60px;
+    transform: translateX(-50%);
+  }
+
+  .tail {
+    position: absolute;
+    width: 80px;
+    height: 15px;
+    background: var(--cat-color);
+    border-radius: 10px;
+    bottom: 10px;
+    right: -50px;
+    transform-origin: left center;
+    animation: tailWag 0.5s infinite alternate ease-in-out;
+  }
+
+  .leg {
+    position: absolute;
+    bottom: -20px;
+    width: 25px;
+    height: 30px;
+    background: #222;
+    border-radius: 10px;
+  }
+  .leg.left {
+    left: 25px;
+    animation: danceLeft 0.5s infinite alternate ease-in-out;
+  }
+  .leg.right {
+    right: 25px;
+    animation: danceRight 0.5s infinite alternate ease-in-out;
+  }
+
+  .shadow {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: shadowPulse 1s infinite;
+  }
+
+  @keyframes wiggle {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  @keyframes tailWag {
+    from { transform: rotate(20deg); }
+    to { transform: rotate(-20deg); }
+  }
+  @keyframes danceLeft {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+  }
+  @keyframes danceRight {
+    from { transform: translateY(-12px); }
+    to { transform: translateY(0); }
+  }
+  @keyframes blink {
+    0%, 90%, 100% { height: 7px; }
+    95% { height: 1px; }
+  }
+  @keyframes shadowPulse {
+    0%, 100% { width: 100px; opacity: 0.3; }
+    50% { width: 80px; opacity: 0.1; }
+  }
+
+  h2 {
+    position: absolute;
+    bottom: 40px;
+    text-align: center;
+    width: 100%;
+    font-size: 1.4em;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px #ff66cc, 0 0 15px #ff66cc;
+    animation: glowText 1s infinite alternate;
+    z-index: 2;
+  }
+
+  @keyframes glowText {
+    from { text-shadow: 0 0 8px #ff66cc; }
+    to { text-shadow: 0 0 15px #66ffcc; color: #66ffff; }
+  }
+
+  #play-btn {
+    position: absolute;
+    top: 30px;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    z-index: 5;
+  }
+
+  #play-btn:hover {
+    transform: scale(1.1);
+    background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+  }
+</style>
+</head>
+<body>
+  <canvas id="lights"></canvas>
+
+  <button id="play-btn">▶ Play Music & Dance</button>
+
+  <div class="stage">
+    <div class="cat">
+      <div class="ear left"></div>
+      <div class="ear right"></div>
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="mouth"></div>
+      <div class="tail"></div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+    </div>
+    <div class="shadow"></div>
+  </div>
+
+  <h2>🎶 Disco Cat is Grooving! 🎵</h2>
+
+  <audio id="music" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4b73bda2cd.mp3?filename=funny-disco-loop-14192.mp3"></audio>
+
+  <script>
+    // Background disco lights
+    const canvas = document.getElementById("lights");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    let lights = [];
+    for (let i = 0; i < 40; i++) {
+      lights.push({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        r: Math.random() * 50 + 20,
+        color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2,
+      });
+    }
+
+    function drawLights() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (let l of lights) {
+        ctx.beginPath();
+        const gradient = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+        gradient.addColorStop(0, l.color);
+        gradient.addColorStop(1, "transparent");
+        ctx.fillStyle = gradient;
+        ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+        ctx.fill();
+        l.x += l.dx;
+        l.y += l.dy;
+        if (l.x < 0 || l.x > innerWidth) l.dx *= -1;
+        if (l.y < 0 || l.y > innerHeight) l.dy *= -1;
+      }
+      requestAnimationFrame(drawLights);
+    }
+    drawLights();
+
+    // Music controls + color sync
+    const music = document.getElementById("music");
+    const playBtn = document.getElementById("play-btn");
+    let colorIndex = 0;
+    const colors = ["#ff4b2b", "#ff9a9e", "#00e5ff", "#39ff14", "#ff66cc"];
+
+    playBtn.addEventListener("click", () => {
+      if (music.paused) {
+        music.play();
+        playBtn.textContent = "⏸ Pause Music";
+        startColorPulse();
+      } else {
+        music.pause();
+        playBtn.textContent = "▶ Play Music & Dance";
+      }
+    });
+
+    function startColorPulse() {
+      setInterval(() => {
+        document.documentElement.style.setProperty("--cat-color", colors[colorIndex % colors.length]);
+        document.documentElement.style.setProperty("--accent", colors[(colorIndex + 2) % colors.length]);
+        colorIndex++;
+      }, 600);
+    }
+  </script>
+</body>
+</html>

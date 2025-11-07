@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐱 Dancing Cat Animation</title>
+<style>
+  body {
+    background: linear-gradient(135deg, #ffd6e0, #ffe4b5);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: "Comic Sans MS", cursive;
+  }
+
+  .stage {
+    position: relative;
+    width: 200px;
+    height: 220px;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+
+  /* CAT BODY */
+  .cat {
+    position: relative;
+    width: 120px;
+    height: 100px;
+    background: #444;
+    border-radius: 60px 60px 40px 40px;
+    margin: 0 auto;
+    top: 40px;
+    animation: wiggle 0.6s infinite alternate;
+  }
+
+  /* EARS */
+  .ear {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #444;
+    top: -25px;
+    border-radius: 10px;
+  }
+  .ear.left {
+    left: 10px;
+    transform: rotate(-20deg);
+  }
+  .ear.right {
+    right: 10px;
+    transform: rotate(20deg);
+  }
+
+  /* FACE */
+  .eye {
+    position: absolute;
+    top: 30px;
+    width: 15px;
+    height: 15px;
+    background: white;
+    border-radius: 50%;
+  }
+  .eye.left {
+    left: 30px;
+  }
+  .eye.right {
+    right: 30px;
+  }
+  .eye::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 7px;
+    height: 7px;
+    background: black;
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+
+  .mouth {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    border-bottom: 3px solid black;
+    border-radius: 0 0 10px 10px;
+    left: 50%;
+    top: 60px;
+    transform: translateX(-50%);
+  }
+
+  /* TAIL */
+  .tail {
+    position: absolute;
+    width: 70px;
+    height: 20px;
+    background: #444;
+    border-radius: 10px;
+    bottom: 10px;
+    right: -40px;
+    transform-origin: left center;
+    animation: tailWag 0.5s infinite alternate ease-in-out;
+  }
+
+  /* LEGS */
+  .leg {
+    position: absolute;
+    bottom: -20px;
+    width: 25px;
+    height: 30px;
+    background: #333;
+    border-radius: 10px;
+  }
+  .leg.left {
+    left: 25px;
+    animation: danceLeft 0.5s infinite alternate ease-in-out;
+  }
+  .leg.right {
+    right: 25px;
+    animation: danceRight 0.5s infinite alternate ease-in-out;
+  }
+
+  /* DANCE FLOOR SHADOW */
+  .shadow {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: shadowPulse 1.2s infinite ease-in-out;
+  }
+
+  /* ANIMATIONS */
+  @keyframes wiggle {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+  }
+
+  @keyframes tailWag {
+    from { transform: rotate(15deg); }
+    to { transform: rotate(-15deg); }
+  }
+
+  @keyframes danceLeft {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+  }
+
+  @keyframes danceRight {
+    from { transform: translateY(-10px); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  @keyframes blink {
+    0%, 90%, 100% { height: 7px; }
+    95% { height: 1px; }
+  }
+
+  @keyframes shadowPulse {
+    0%, 100% { width: 100px; opacity: 0.3; }
+    50% { width: 80px; opacity: 0.15; }
+  }
+
+  /* Caption */
+  h2 {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+    font-size: 1.3em;
+    color: #333;
+    animation: colorShift 2s infinite alternate;
+  }
+
+  @keyframes colorShift {
+    from { color: #ff4b2b; }
+    to { color: #ff9a9e; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="cat">
+      <div class="ear left"></div>
+      <div class="ear right"></div>
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="mouth"></div>
+      <div class="tail"></div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+    </div>
+    <div class="shadow"></div>
+  </div>
+  <h2>🎵 The Cat is Dancing! 🎶</h2>
+</body>
+</html>
