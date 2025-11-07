@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flip Clock - No Duplication, Smooth Milliseconds</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+
+  body {
+    background: black;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .flipclock {
+    display: flex;
+    gap: 20px;
+    padding: 30px 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.3);
+    user-select: none;
+  }
+
+  /* Single digit container */
+  .digit {
+    position: relative;
+    width: 100px;
+    height: 140px;
+    perspective: 800px;
+  }
+
+  /* Top and bottom halves */
+  .top-half, .bottom-half {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    color: black;
+    font-size: 110px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 70px;
+  }
+  .bottom-half {
+    border-radius: 0 0 20px 20px;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+    line-height: 70px;
+  }
+
+  /* The digit text inside each half */
+  .top-half span, .bottom-half span {
+    position: absolute;
+    width: 100%;
+    left: 0;
+  }
+
+  /* Show only top half of digit in top container */
+  .top-half span {
+    top: 0;
+  }
+
+  /* Show only bottom half of digit in bottom container, shift digit up */
+  .bottom-half span {
+    top: -70px; /* half of digit height */
+  }
+
+  /* Colon and dot */
+  .separator {
+    font-size: 110px;
+    line-height: 140px;
+    color: black;
+    user-select: none;
+    padding: 0 10px;
+  }
+
+  /* Flip animation */
+  .flip-top, .flip-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    backface-visibility: hidden;
+  }
+  .flip-top {
+    top: 0;
+    transform-origin: bottom;
+  }
+  .flip-bottom {
+    bottom: 0;
+    transform-origin: top;
+  }
+
+  /* Animations */
+  .flip-top.animate {
+    animation: flipTop 0.5s forwards;
+  }
+  .flip-bottom.animate {
+    animation: flipBottom 0.5s forwards;
+  }
+
+  @keyframes flipTop {
+    0% { transform: rotateX(0deg); }
+    100% { transform: rotateX(-90deg); }
+  }
+  @keyframes flipBottom {
+    0% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="flipclock" aria-label="Flip clock showing current time">
+  <!-- Hour Tens -->
+  <div class="digit" id="hourTens">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+  <!-- Hour Units -->
+  <div class="digit" id="hourUnits">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+
+  <div class="separator">:</div>
+
+  <!-- Minute Tens -->
+  <div class="digit" id="minuteTens">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+  <!-- Minute Units -->
+  <div class="digit" id="minuteUnits">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+
+  <div class="separator">:</div>
+
+  <!-- Second Tens -->
+  <div class="digit" id="secondTens">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+  <!-- Second Units -->
+  <div class="digit" id="secondUnits">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+
+  <div class="separator">.</div>
+
+  <!-- Millisecond Hundreds -->
+  <div class="digit" id="milliHundreds">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+  <!-- Millisecond Tens -->
+  <div class="digit" id="milliTens">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+  <!-- Millisecond Units -->
+  <div class="digit" id="milliUnits">
+    <div class="top-half"><span>0</span></div>
+    <div class="bottom-half"><span>0</span></div>
+  </div>
+</div>
+
+<script>
+  // Function to update a digit smoothly
+  function updateDigit(element, value) {
+    const topHalf = element.querySelector('.top-half span');
+    const bottomHalf = element.querySelector('.bottom-half span');
+    if (topHalf.textContent !== value) {
+      // Update text content directly (no duplicate digits)
+      topHalf.textContent = value;
+      bottomHalf.textContent = value;
+    }
+  }
+
+  function pad(num, size) {
+    return num.toString().padStart(size, '0');
+  }
+
+  function updateTime() {
+    const now = new Date();
+
+    // Get time parts
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+    let milliseconds = now.getMilliseconds();
+
+    // Pad with zeros
+    const [hT, hU] = pad(hours, 2).split('');
+    const [mT, mU] = pad(minutes, 2).split('');
+    const [sT, sU] = pad(seconds, 2).split('');
+
+    // Pad milliseconds to 3 digits
+    const msStr = pad(milliseconds, 3);
+    const [msH, msT, msU] = msStr.split('');
+
+    // Update each digit without duplication or animation glitches
+    updateDigit(document.getElementById('hourTens'), hT);
+    updateDigit(document.getElementById('hourUnits'), hU);
+
+    updateDigit(document.getElementById('minuteTens'), mT);
+    updateDigit(document.getElementById('minuteUnits'), mU);
+
+    updateDigit(document.getElementById('secondTens'), sT);
+    updateDigit(document.getElementById('secondUnits'), sU);
+
+    updateDigit(document.getElementById('milliHundreds'), msH);
+    updateDigit(document.getElementById('milliTens'), msT);
+    updateDigit(document.getElementById('milliUnits'), msU);
+
+    // Request next frame for smooth update
+    requestAnimationFrame(updateTime);
+  }
+
+  // Start clock
+  requestAnimationFrame(updateTime);
+</script>
+
+</body>
+</html>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+
+  body {
+    background: black;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .flipclock {
+    display: flex;
+    gap: 20px;
+    padding: 30px 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.3);
+    user-select: none;
+  }
+
+  /* Single digit container */
+  .digit {
+    position: relative;
+    width: 100px;
+    height: 140px;
+    perspective: 800px;
+  }
+
+  /* Top and bottom halves */
+  .top-half, .bottom-half {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    color: black;
+    font-size: 110px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 70px;
+  }
+  .bottom-half {
+    border-radius: 0 0 20px 20px;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+    line-height: 70px;
+  }
+
+  /* The digit text inside each half */
+  .top-half span, .bottom-half span {
+    position: absolute;
+    width: 100%;
+    left: 0;
+  }
+
+  /* Show only top half of digit in top container */
+  .top-half span {
+    top: 0;
+  }
+
+  /* Show only bottom half of digit in bottom container, shift digit up */
+  .bottom-half span {
+    top: -70px; /* half of digit height */
+  }
+
+  /* Colon and dot */
+  .separator {
+    font-size: 110px;
+    line-height: 140px;
+    color: black;
+    user-select: none;
+    padding: 0 10px;    
+    }
+
+    /* Flip animation */    
+    .flip-top, .flip-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    backface-visibility: hidden;
+    }
+    .flip-top {
+    top: 0;
+    transform-origin: bottom;
+    }
+    .flip-bottom {
+    bottom: 0;
+    transform-origin: top;
+    }
+    /* Animations */
+    .flip-top.animate {
+    animation: flipTop 0.5s forwards;
+    }
+    .flip-bottom.animate {
+    animation: flipBottom 0.5s forwards;
+    }
+    @keyframes flipTop {
+    0% { transform: rotateX(0deg); }
+    100% { transform: rotateX(-90deg); }
+    }
+    @keyframes flipBottom {
+    0% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0deg); }
+    }
+</style>
+<style>
+  .hour {
+    width: 6px;
+    height: 80px;
+    bottom: 50%;
+    background: #00ffff;
+    box-shadow: 0 0 15px #00ffffaa;
+  }
+
+  .minute {
+    width: 4px;
+    height: 100px;
+    bottom: 50%;
+    background: #ff00ff;
+    box-shadow: 0 0 15px #ff00ffaa;
+  }
+
+  .second {
+    width: 2px;
+    height: 120px;
+    bottom: 50%;
+    background: #ff007c;
+    box-shadow: 0 0 20px #ff007caa;
+  }
+
+  .center-dot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #00ffff;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #00ffff;
+  }
+
+  /* Digital clock below */
+  .digital {
+    margin-top: 40px;
+    font-size: 2.5em;
+    letter-spacing: 3px;
+    color: #00ffff;
+    text-shadow: 0 0 20px #00ffff;
+  }
+
+  .digital small {
+    font-size: 0.6em;
+    color: #ff00ff;
+  }
+
+  /* Ticks around clock */
+  .tick {
+    position: absolute;
+    width: 2px;
+    height: 10px;
+    background: #00ffff55;
+    top: 5px;
+    left: 50%;
+    transform-origin: bottom center;
+  }
+
+  /* Optional glow pulse */
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 25px #00ffff; }
+    50% { box-shadow: 0 0 40px #00ffff88; }
+  }
+
+  .clock-container {
+    animation: pulse 3s infinite ease-in-out;
+  }
+</style>
+<style>
+  .hour {
+    width: 6px;
+    height: 80px;
+    bottom: 50%;
+    box-shadow: 0 0 15px #00ffffaa;
+  }
+    .minute {
+        width: 4px;
+        height: 100px;
+        bottom: 50%;
+        box-shadow: 0 0 15px #00ffffaa;
+    }
+    .second {
+        width: 2px;
+        height: 120px;
+        bottom: 50%;
+        box-shadow: 0 0 20px #ff007caa;
+    }
+    .center-dot {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: #00ffff;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #00ffff;
+    }
+    /* Digital clock below */
+    .digital {
+        margin-top: 40px;
+        font-size: 2.5em;
+        letter-spacing: 3px;
+        color: #00ffff;
+        text-shadow: 0 0 20px #00ffff;
+    }
+    .digital small {
+        font-size: 0.6em;
+        color: #ff00ff;
+    }
+    /* Ticks around clock */
+    .tick {
+        position: absolute;
+        width: 2px;
+        height: 10px;
+        background: #00ffff55;
+        top: 5px;
+        left: 50%;
+        transform-origin: bottom center;
+    }
+    /* Optional glow pulse */
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 25px #00ffff; }
+        50% { box-shadow: 0 0 40px #00ffff88; }
+    }
+
+    .clock-container {
+        animation: pulse 3s infinite ease-in-out;
+    }
+</style><style>
+  .hour {   
+    width: 6px;
+    height: 80px;
+    bottom: 50%;
+    box-shadow: 0 0 15px #00ffffaa;
+  }
+    .minute {
+        width: 4px;
+        height: 100px;
+        bottom: 50%;
+        box-shadow: 0 0 15px #00ffffaa;
+    }
+    .second {
+        width: 2px;
+        height: 120px;
+        bottom: 50%;
+        box-shadow: 0 0 20px #ff007caa;
+    }
+    .center-dot {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: #00ffff;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #00ffff;
+    }
+    /* Digital clock below */
+    .digital {
+        margin-top: 40px;
+        font-size: 2.5em;
+        letter-spacing: 3px;
+        color: #00ffff;
+        text-shadow: 0 0 20px #00ffff;
+    }
+    .digital small {
+        font-size: 0.6em;
+        color: #ff00ff;
+    }   
+    /* Ticks around clock */
+
+    .tick {
+        position: absolute;
+        width: 2px;
+        height: 10px;
+        background: #00ffff55;
+        top: 5px;
+        left: 50%;
+        transform-origin: bottom center;
+    }
+    
