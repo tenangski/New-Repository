@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Click Mania 🎯</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle, #ffe259, #ffa751);
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    #game-area {
+      position: relative;
+      width: 80vw;
+      height: 60vh;
+      border: 3px dashed #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #target {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff4b2b, #ff416c);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: transform 0.1s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #target:active {
+      transform: scale(0.9);
+    }
+
+    #stats {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+
+    #start-btn {
+      background: #4facfe;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 15px;
+    }
+
+    #start-btn:hover {
+      background: #00c6ff;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Click Mania!</h1>
+  <p>Click the target as many times as you can before time runs out!</p>
+
+  <div id="game-area">
+    <div id="target">Click!</div>
+  </div>
+
+  <div id="stats">
+    <p>⏱ Time left: <span id="time">20</span>s</p>
+    <p>💥 Score: <span id="score">0</span></p>
+  </div>
+
+  <button id="start-btn" onclick="startGame()">Start Game</button>
+
+  <script>
+    const target = document.getElementById("target");
+    const gameArea = document.getElementById("game-area");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+    const startBtn = document.getElementById("start-btn");
+
+    let score = 0;
+    let timeLeft = 20;
+    let gameRunning = false;
+    let timer;
+
+    function randomPosition() {
+      const areaWidth = gameArea.clientWidth - target.offsetWidth;
+      const areaHeight = gameArea.clientHeight - target.offsetHeight;
+      const x = Math.random() * areaWidth;
+      const y = Math.random() * areaHeight;
+      target.style.left = `${x}px`;
+      target.style.top = `${y}px`;
+    }
+
+    target.addEventListener("click", () => {
+      if (!gameRunning) return;
+      score++;
+      scoreDisplay.textContent = score;
+      randomPosition();
+    });
+
+    function startGame() {
+      if (gameRunning) return;
+      score = 0;
+      timeLeft = 20;
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = timeLeft;
+      gameRunning = true;
+      startBtn.disabled = true;
+      target.style.display = "block";
+      randomPosition();
+
+      timer = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      target.style.display = "none";
+      startBtn.disabled = false;
+      alert(`⏰ Time's up! Your final score: ${score}`);
+    }
+
+    target.style.display = "none"; // Hide until game starts
+  </script>
+</body>
+</html>
+

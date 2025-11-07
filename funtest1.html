@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Funny Quote Generator 😂</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      color: #333;
+      text-align: center;
+      padding: 50px;
+      transition: background 0.5s;
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #222;
+      text-shadow: 2px 2px #fff;
+    }
+    #quote {
+      margin: 40px auto;
+      font-size: 1.6em;
+      max-width: 600px;
+      background: #fff9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s;
+    }
+    #quote:hover {
+      transform: scale(1.05);
+    }
+    button {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background: #ff4757;
+      transform: scale(1.1);
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>😂 Funny Quote Generator 😂</h1>
+  <div id="quote">Click the button for a random funny quote!</div>
+  <button onclick="newQuote()">Show me another!</button>
+
+  <footer>Made with ❤️ and bad jokes</footer>
+
+  <script>
+    const quotes = [
+      "I'm on a seafood diet. I see food, and I eat it.",
+      "Why don’t skeletons fight each other? They don’t have the guts.",
+      "I told my computer I needed a break, and it froze.",
+      "Parallel lines have so much in common… it’s a shame they’ll never meet.",
+      "My bed is a magical place where I suddenly remember everything I forgot to do.",
+      "Why do bees have sticky hair? Because they use honeycombs.",
+      "I used to play piano by ear, but now I use my hands.",
+      "Of course I talk to myself. Sometimes I need expert advice!",
+      "I would lose weight, but I hate losing.",
+      "I put my phone on airplane mode, but it’s not flying yet."
+    ];
+
+    function newQuote() {
+      const random = Math.floor(Math.random() * quotes.length);
+      const quoteBox = document.getElementById("quote");
+      quoteBox.textContent = quotes[random];
+
+      // Random background each click
+      const colors = ["#ff9a9e", "#a18cd1", "#fbc2eb", "#fad0c4", "#ffecd2", "#f6d365"];
+      const color1 = colors[Math.floor(Math.random() * colors.length)];
+      const color2 = colors[Math.floor(Math.random() * colors.length)];
+      document.body.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+    }
+  </script>
+</body>
+</html>

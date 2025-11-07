@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Click Mania Extreme 🎯</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle, #ff9a9e, #fad0c4);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #222;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      margin: 0;
+      text-shadow: 2px 2px #fff;
+    }
+
+    #game-area {
+      position: relative;
+      width: 80vw;
+      height: 60vh;
+      border: 4px dashed #fff;
+      border-radius: 20px;
+      margin-top: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #target {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff416c, #ff4b2b);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.1s ease, background 0.3s;
+    }
+
+    #target:active {
+      transform: scale(0.9);
+    }
+
+    #stats {
+      margin-top: 15px;
+      font-size: 1.2em;
+    }
+
+    #start-btn {
+      background: #4facfe;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 15px;
+    }
+
+    #start-btn:hover {
+      background: #00c6ff;
+      transform: scale(1.05);
+    }
+
+    #high-score {
+      font-weight: bold;
+      color: #222;
+    }
+
+    #combo {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 1.4em;
+      color: #ff416c;
+      font-weight: bold;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .combo-pop {
+      animation: pop 0.5s forwards;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Click Mania Extreme 🎯</h1>
+  <p>Click the moving target as fast as you can before time runs out!</p>
+
+  <div id="game-area">
+    <div id="target">🔥</div>
+    <div id="combo"></div>
+  </div>
+
+  <div id="stats">
+    <p>⏱ Time left: <span id="time">30</span>s | 💥 Score: <span id="score">0</span></p>
+    <p>🏆 High Score: <span id="high-score">0</span></p>
+  </div>
+
+  <button id="start-btn" onclick="startGame()">Start Game</button>
+
+  <audio id="click-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="bonus-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="end-sound" src="https://actions.google.com/sounds/v1/cartoon/descending_whistle.ogg"></audio>
+
+  <script>
+    const target = document.getElementById("target");
+    const gameArea = document.getElementById("game-area");
+    const scoreDisplay = document.getElementById("score");
+    const timeDisplay = document.getElementById("time");
+    const startBtn = document.getElementById("start-btn");
+    const highScoreDisplay = document.getElementById("high-score");
+    const comboDisplay = document.getElementById("combo");
+
+    const clickSound = document.getElementById("click-sound");
+    const bonusSound = document.getElementById("bonus-sound");
+    const endSound = document.getElementById("end-sound");
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameRunning = false;
+    let timer;
+    let combo = 0;
+    let comboTimeout;
+    let speed = 900; // initial target move speed (ms)
+
+    // Load high score
+    let highScore = localStorage.getItem("clickManiaHighScore") || 0;
+    highScoreDisplay.textContent = highScore;
+
+    function randomPosition() {
+      const areaWidth = gameArea.clientWidth - target.offsetWidth;
+      const areaHeight = gameArea.clientHeight - target.offsetHeight;
+      const x = Math.random() * areaWidth;
+      const y = Math.random() * areaHeight;
+      target.style.left = `${x}px`;
+      target.style.top = `${y}px`;
+    }
+
+    target.addEventListener("click", () => {
+      if (!gameRunning) return;
+
+      clickSound.currentTime = 0;
+      clickSound.play();
+
+      score++;
+      combo++;
+      scoreDisplay.textContent = score;
+
+      // Combo text
+      comboDisplay.textContent = `🔥 x${combo}!`;
+      comboDisplay.classList.add("combo-pop");
+      setTimeout(() => comboDisplay.classList.remove("combo-pop"), 300);
+
+      clearTimeout(comboTimeout);
+      comboTimeout = setTimeout(() => (combo = 0, comboDisplay.textContent = ""), 1200);
+
+      // Bonus sound and color
+      if (combo % 5 === 0 && combo > 0) {
+        bonusSound.currentTime = 0;
+        bonusSound.play();
+        target.style.background = "linear-gradient(145deg, #00ff99, #00bfff)";
+        setTimeout(() => (target.style.background = "linear-gradient(145deg, #ff416c, #ff4b2b)"), 500);
+      }
+
+      // Harder as score rises
+      if (score % 10 === 0 && target.offsetWidth > 30) {
+        target.style.width = target.offsetWidth - 5 + "px";
+        target.style.height = target.offsetHeight - 5 + "px";
+        speed = Math.max(300, speed - 80);
+      }
+
+      randomPosition();
+    });
+
+    function startGame() {
+      if (gameRunning) return;
+      score = 0;
+      timeLeft = 30;
+      combo = 0;
+      speed = 900;
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = timeLeft;
+      gameRunning = true;
+      startBtn.disabled = true;
+      target.style.display = "block";
+      target.style.width = "80px";
+      target.style.height = "80px";
+      comboDisplay.textContent = "";
+      randomPosition();
+
+      timer = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+
+      // Move target automatically
+      moveTarget();
+    }
+
+    function moveTarget() {
+      if (!gameRunning) return;
+      randomPosition();
+      setTimeout(moveTarget, speed);
+    }
+
+    function endGame() {
+      clearInterval(timer);
+      gameRunning = false;
+      endSound.play();
+      target.style.display = "none";
+      startBtn.disabled = false;
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("clickManiaHighScore", highScore);
+        highScoreDisplay.textContent = highScore;
+        alert(`🏆 NEW HIGH SCORE: ${score}!`);
+      } else {
+        alert(`⏰ Time’s up! Your score: ${score}`);
+      }
+    }
+
+    target.style.display = "none";
+  </script>
+</body>
+</html>
